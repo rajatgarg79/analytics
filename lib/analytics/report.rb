@@ -7,7 +7,7 @@ module Analytics
     
     DIMENSIONS = [
       :continent, :city, :country, :date, :year, 
-      :month, :week, :day, :hour
+      :month, :week, :day, :hour, :page_path
     ]
 
 
@@ -19,8 +19,8 @@ module Analytics
       @renderer = renderer
     end
 
-    def get(start_date, end_date, metrics, dimensions = [])
-      response = Analytics::Request.new(Analytics::BASE_URL, get_url(start_date, end_date, metrics, dimensions), @access_token).response
+    def get(start_date, end_date, metrics, dimensions = [], start-index = 1, max-results = 1000)
+      response = Analytics::Request.new(Analytics::BASE_URL, get_url(start_date, end_date, metrics, dimensions, start-index, max-results), @access_token).response
       return nil unless response["rows"]
       response["rows"].map do |row|
         @renderer.render(row, metrics, dimensions)
@@ -28,9 +28,11 @@ module Analytics
     end
 
   private
-    def get_url(start_date, end_date, metrics, dimensions)
+    def get_url(start_date, end_date, metrics, dimensions, start-index, max-results)
       str = "data/ga?ids=ga:#{@id}&start-date=#{start_date.strftime("%F")}&end-date=#{end_date.strftime("%F")}&metrics=#{to_ga(metrics)}"
       str += "&dimensions=#{to_ga(dimensions)}" unless dimensions.empty?
+      str += "&start-index=#{start_index}" unless start-index.blank?
+      str += "&max-results=#{max-results}" unless max-results.empty?
       str
     end
 
